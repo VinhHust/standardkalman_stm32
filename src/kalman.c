@@ -63,3 +63,11 @@ void Kalman_Correct(KalmanFilter *kf,float delta_theta, float delta_x) {
 
     kf->first_time = 0; //da chay qua lan dau tien roi
 }
+
+void Kalman_Predict(KalmanFilter *kf, float u) {
+    //predict state
+    kf->xpred[0] = Add[0][0]*kf->xcorrect[0] + Add[0][1]*kf->xcorrect[1] + Add[0][2]*kf->xcorrect[2] + Add[0][3]*kf->xcorrect[3] + Bdd[0]*u;
+    kf->xpred[1] = Add[1][0]*kf->xcorrect[0] + Add[1][1]*kf->xcorrect[1] + Add[1][2]*kf->xcorrect[2] + Add[1][3]*kf->xcorrect[3] + Bdd[1]*u;
+    kf->xpred[2] = Add[2][0]*kf->xcorrect[0] + Add[2][1]*kf->xcorrect[1] + Add[2][2]*kf->xcorrect[2] + Add[2][3]*kf->xcorrect[3] + Bdd[2]*u;
+    kf->xpred[3] = Add[3][0]*kf->xcorrect[0] + Add[3][1]*kf->xcorrect[1] + Add[3][2]*kf->xcorrect[2] + Add[3][3]*kf->xcorrect[3] + Bdd[3]*u;
+}
