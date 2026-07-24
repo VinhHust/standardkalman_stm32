@@ -317,4 +317,4 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 	filter_speed = (alpha*target_speed) + ((1.0f-alpha)*filter_speed); //filter speed là vận tốc cũ, target speed là vận tốc mới
 	return filter_speed;
 }
-
+*test commit
