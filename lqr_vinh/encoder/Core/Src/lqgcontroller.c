@@ -279,6 +279,9 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 			float x  = pendulum->cart_enc->linear_position * MiliMtoM;  //lấy vị trí
 			float v  = pendulum->cart_enc->linear_speed    * MiliMtoM;  //lấy vận tốc dài
 
+			//con lắc rủ qua hơn nửa vòng thì mới bật swing down chứ k bật ngay từ đầu 
+			if(fabsf(theta) < (PI*0.5f)){
+			
 			float Ek = 0.5f * pendulum_inertia * (w*w); // 0.5(I+ml^2)
 			float Ep = pendulum_mass * GRAVITY * pendulum_length * (1.0f - cosf(theta)); // mgl(1-cos(theta))
 			float E = Ek + Ep;
@@ -335,8 +338,16 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 				break;
 
 			}
+		}
+		else {
+			//neu con lac o nua tren thi chua can dieu khien gi 
+			target_speed = 0.0f;
+			pendulum->current_accel = 0.0f;
+			down_hold_timer = 0.0f; //reset bộ đếm đứng yên cho lần swing down mới
+		}
 			break;
 		}
+		
 	}
 	//bộ lọc EMA cho vận tốc
 	//alpha lớn thì ưu tiên vận tốc mới, alpha nhỏ thì ưu tiên vận tốc cũ
