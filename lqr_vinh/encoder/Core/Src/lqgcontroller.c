@@ -208,6 +208,14 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 		//TRẠNG THÁI CÂN BẰNG DÙNG LQG 
 		case LQG_CONTROL:{
 			float current_angle = pendulum->pend_enc->angle_position;
+
+			//ẤN NÚT PC13 trong lúc đang cân bằng -> chủ động chuyển sang SWING DOWN
+			if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
+				down_hold_timer = 0.0f; //reset bộ đếm đứng yên cho lần swing down mới
+				pendulum->state = SWING_DOWN;
+				break;
+			}
+
 			//phần này để bảo vệ cơ khí nếu con lắc rủ xuống thấp quá
 			if(fabsf(current_angle) < (PI*0.75f)){
 				pendulum->state = IDLE_PENDULUM;
