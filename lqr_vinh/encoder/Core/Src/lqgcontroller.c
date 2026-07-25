@@ -222,8 +222,9 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 			float theta_lech_meas = angle_error(current_angle);
 			float x_lech_meas = (pendulum->cart_enc->linear_position * MiliMtoM) - reference_point;
 
-			//CORRECTION
-			//nội dung của hàm kalman correct đã được viết trong file kalman.c, giờ chỉ cần gọi kết quả trong hàm này ra để dùng
+			//CORRECTION	
+			//nội dung đầy đủ của hàm Kalman_Correct đã được triển khai trong file kalman.c, giờ gọi hàm ra là đã tính toán hết
+			//giờ chỉ lôi các biến xcorrect đã được tính ra để dùng cho LQR
 			Kalman_Correct(kf, theta_lech_meas, x_lech_meas);
 
 			debug_kf_theta = kf->xcorrect[0];
@@ -231,13 +232,13 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 			debug_kf_x     = kf->xcorrect[2];
 			debug_kf_v     = kf->xcorrect[3];
 
-			//LQR bằng state phán đoán ở trên
+			//BƯỚC 2: LUẬT ĐIỀU KHIỂN u = -K.xhat
 			//state đã là độ lệch quanh upright nên xref = 0, dấu trừ nằm ngoài
 			//tương đương y hệt LQR cũ: K[0]*(PI-angle) chính là -K[0]*theta_lech
-			float lqr_giatoc = -( LQR_tune[0]*debug_kf_theta
-			                    + LQR_tune[1]*debug_kf_omega
-			                    + LQR_tune[2]*debug_kf_x
-			                    + LQR_tune[3]*debug_kf_v);
+			float lqr_giatoc = -( LQR_tune[0]*kf->xcorrect[0]
+			                    + LQR_tune[1]*kf->xcorrect[1]
+			                    + LQR_tune[2]*kf->xcorrect[2]
+			                    + LQR_tune[3]*kf->xcorrect[3] );
 
 			//GIỚI HẠN GIA TỐC
 			if (lqr_giatoc > max_accel) {
@@ -248,7 +249,8 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 
 			pendulum ->current_accel = lqr_giatoc; //ghi biến cục bộ vào currentaccel để debug
 
-			//PREDICTION
+			//BƯỚC 3: PREDICT cho chu kỳ sau, nạp vào u ĐÃ BÃO HÒA
+			//vì đó mới là gia tốc thực tế mà hệ nhận được
 			Kalman_Predict(kf, lqr_giatoc);
 
 			//TÍCH PHÂN THÀNH VẬN TỐC v = v0 + a.dT
@@ -269,10 +271,6 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 			float x  = pendulum->cart_enc->linear_position * MiliMtoM;  //lấy vị trí
 			float v  = pendulum->cart_enc->linear_speed    * MiliMtoM;  //lấy vận tốc dài
 
-			float mauso = 1.0f + (1.0f - cosf(theta))*5.0f;
-			float a_down = (k_angle_down * sinf(0 - theta)) / mauso
-						             + (k_position_down * (0 - x))
-						             + (k_vel_down * (0 - v));
 
 			//GIỚI HẠN GIA TỐC
 			if (a_down > max_swingdown_accel) {
@@ -317,4 +315,4 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 	filter_speed = (alpha*target_speed) + ((1.0f-alpha)*filter_speed); //filter speed là vận tốc cũ, target speed là vận tốc mới
 	return filter_speed;
 }
-*test commit
+
