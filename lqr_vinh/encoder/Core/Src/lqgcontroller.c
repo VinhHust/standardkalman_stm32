@@ -284,9 +284,13 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 			else if(sign_swingdown<-0.0f){
 				sign_val_swingdown = -1;
 			}
-			else{
+			else{s
 				sign_val_swingdown = 0; //nếu như nằm ở khoảng giữa thì = 0 luôn để ko bị nhiễu
 			}
+			
+			//Lúc ở vị trí cân bằng dưới thì Er = 0, nên E - Er = E - 0 = E
+			float a_down = k_swing * (E - 0.0f) * sign_val_swingdown;
+			a_down += -k_position_down * x - k_vel_down * v; //bộ PD kéo về tâm
 
 			//GIỚI HẠN GIA TỐC
 			if (a_down > max_swingdown_accel) {
