@@ -271,6 +271,22 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 			float x  = pendulum->cart_enc->linear_position * MiliMtoM;  //lấy vị trí
 			float v  = pendulum->cart_enc->linear_speed    * MiliMtoM;  //lấy vận tốc dài
 
+			float Ek = 0.5f * pendulum_inertia * (w*w); // 0.5(I+ml^2)
+			float Ep = pendulum_mass * GRAVITY * pendulum_length * (1.0f - cosf(theta)); // mgl(1-cos(theta))
+			float E = Ek + Ep;
+
+			float sign_swingdown = w * cosf(theta);
+			float sign_val_swingdown = 0.0f;
+
+			if(sign_swingdown>0.0f){ //thử tăng giới hạn đổi dấu của sign
+				sign_val_swingdown = 1;
+			}
+			else if(sign_swingdown<-0.0f){
+				sign_val_swingdown = -1;
+			}
+			else{
+				sign_val_swingdown = 0; //nếu như nằm ở khoảng giữa thì = 0 luôn để ko bị nhiễu
+			}
 
 			//GIỚI HẠN GIA TỐC
 			if (a_down > max_swingdown_accel) {
