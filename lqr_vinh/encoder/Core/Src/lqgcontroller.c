@@ -284,7 +284,7 @@ float run_pendulum(InvertedPendulumTypeDef* pendulum){
 			else if(sign_swingdown<-0.0f){
 				sign_val_swingdown = -1;
 			}
-			else{s
+			else{
 				sign_val_swingdown = 0; //nếu như nằm ở khoảng giữa thì = 0 luôn để ko bị nhiễu
 			}
 			
